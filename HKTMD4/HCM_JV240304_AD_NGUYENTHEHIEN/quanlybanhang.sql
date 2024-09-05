@@ -132,8 +132,7 @@ VALUES
 (5, 10, 950000, '2024-12-01', '2024-12-05');
 
 #### Lấy ra danh phòng có sắp xếp giảm dần theo Price gồm các cột sau:Id,Name,Price,SalePrice,Status,CategoryName,CreatedDate
-select r.id Id,r.name 'Tên Phòng',r.price 'Giá Phòng',r.saleprice 'Giá Giảm',r.status 'Trạng Thái',c.name 'Loại Phòng',r.createdDate 'Ngày Tạo'
-from Room r join Category c 
+select r.id Id,r.name 'Tên Phòng',r.price 'Giá Phòng',r.saleprice 'Giá Giảm',r.status 'Trạng Thái',c.name 'Loại Phòng',r.createdDate 'Ngày Tạo' from Room r join Category c 
 on r.categoryId = c.id
 order by r.price desc;
 
@@ -160,7 +159,7 @@ select id ID ,name 'Tên',email 'Email',phone 'Số Điện Thoại',address 'Đ
 from Customer;
 
 #### Truy vấn danh sách Customergồm:Id,Name,Email,Phone,Address,CreatedDate,Gender,BirthDay, Age (Age là cột suy ra từ BirthDay, Gender nếu = 0 là Nam,1 là Nữ ,2 là khác)
-select id ID ,name 'Tên',email 'Email',phone 'Phone',address 'Địa Chỉ',createdDate 'Giờ Tạo',
+select id ID ,name 'Tên',email 'Email',phone 'Số Điện Thoại',address 'Địa Chỉ',createdDate 'Giờ Tạo',
 	case
 	when gender = 0 then 'Nam'
 	when gender = 1 then 'Nữ'
@@ -172,9 +171,9 @@ from Customer;
 
 #### View v_getRoomInfo Lấy ra danh sách của 10 phòng có giá cao nhất
 create view v_getRoomInfo as
-select id, name, price, saleprice, status, categoryId, createdDate
-from Room
+select id, name, price, saleprice, status, categoryId, createdDate from Room
 order by price desc limit 10;
+
 select * from v_getRoomInfo; -- truy vấn
 
 #### View v_getBookingList hiển thị danh sách phiếu đặt hàng gồm :Id,BookingDate,Status,CusName,Email, Phone,TotalAmount ( Trong đó cột Status nếu = 0 Chưa duyệt,= 1 Đã duyệt,= 2 Đã thanh toán,= 3 Đã hủy)
@@ -186,10 +185,10 @@ select b.id 'ID',b.bookingDate 'Ngày Đặt',
         when b.status = 2 then 'Đã thanh toán'
         when b.status = 3 then 'Đã hủy'
     end 'Trạng Thái',
-c.name 'Tên Khách Hàng',c.email 'Email',c.phone 'Số Điện Thoại',SUM(bd.price) 'Tổng Tiền'
-from Booking b
-join Customer c on b.customerId = c.id
-join BookingDetail bd on b.id = bd.bookingId
+c.name 'Tên Khách Hàng',c.email 'Email',c.phone 'Số Điện Thoại',SUM(bd.price) 'Tổng Tiền' from Booking b join Customer c 
+on b.customerId = c.id
+join BookingDetail bd 
+on b.id = bd.bookingId
 group by b.id, b.bookingDate, b.status, c.name, c.email, c.phone;
 
 SELECT * FROM v_getBookingList; -- truy vấn
@@ -205,6 +204,7 @@ values (p_name, p_status, p_price,p_saleprice, p_createdDate, p_categoryId);
 end;//
 
 call addRoomInfo('Dark Room 666', 1, 6000000, 1800000, '2024-09-05', 1); -- thêm vào
+
 ####  Thủ tục getBookingByCustomerId hiển thị danh sách phieus đặt phòng của khách hàng theo Id khách hàng gồm :Id, BookingDate,Status, TotalAmount(Trong đó cột Status nếu = 0 Chưa duyệt, = 1 Đã duyệt,= 2 Đã thanh toán , = 3 Đã hủy),Khi gọi thủ tục truyền vào id của khách hàng
 delimiter //
 create procedure getBookingByCustomerId(customerId int)
@@ -216,12 +216,12 @@ begin
 		when b.status = 2 then 'Đã Thanh Toán'
 		when b.status = 3 then 'Đã Hủy'
 	end as 'Trạng Thái',
-	SUM(bd.price)  'Tổng Tiền' 
-    from booking b join BookingDetail bd
+	SUM(bd.price)  'Tổng Tiền' from booking b join BookingDetail bd
 	on b.id= bd.bookingId where b.customerId = customerId
 	group by b.id, b.bookingDate, b.status;
 end;//
-call getBookingByCustomerId(5);
+-- truy vấn
+call getBookingByCustomerId(5); -- truyền vào sô ID bạn muốn tìm
 
 #### Thủ tục getRoomPaginate lấy ra danh sách phòng có phân trang gồm :Id,Name,Price,SalePrice, Khi gọi thủ tuc truyền vào limit và page
 -- xóa procedure
@@ -232,8 +232,7 @@ create procedure getRoomPaginate(limitSlot int, page int)
 begin 
  DECLARE offset int;
   SET offset = (page - 1) * limitSlot;
-select id,name, Price, SalePrice
- from Room
+select id,name, Price, SalePrice from Room
  LIMIT limitslot OFFSET offset;
 end;//
 -- truy vấn
@@ -251,5 +250,3 @@ begin
         signal sqlstate '45000' set message_text = 'Giá phòng lớn nhất 5 triệu';
 	end if;
 end;//
-
-#### Tạo trigger tr_check_Room_NotAllow khi thực hiện đặt phòng, nếu ngày đến (StartDate) và ngày đi(EndDate) của đơn hiện tại mà phòng đã có người đặt rồi thì
