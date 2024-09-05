@@ -1,3 +1,7 @@
+#### tạo cơ sở dữ liệu
+create database md04_database_thuchanh_cb;
+#### use vào cơ sở dữ liệu
+use md04_database_thuchanh_cb;
 #### xóa bảng books
 -- drop table books;
 #### xóa bảng Readers

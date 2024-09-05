@@ -1,3 +1,9 @@
+#### tạo cơ sở dữ liệu
+create database md04_database_thuchanh_ad;
+#### use vào cơ sở dữ liệu
+use md04_database_thuchanh_ad;
+
+
 #### xóa bảng Catefory
 -- drop table Category;
 #### xóa bảng Room
