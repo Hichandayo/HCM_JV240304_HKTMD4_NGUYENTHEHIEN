@@ -14,8 +14,6 @@ use md04_database_thuchanh_ad;
 -- drop table Booking;
 #### xóa bảng BookingDetail
 -- drop table BookingDetail;
-#### định dạng Email
-select * FROM Customer WHERE Email NOT REGEXP "^[a-zA-Z0-9][a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*?[a-zA-Z0-9._-]?@[a-zA-Z0-9][a-zA-Z0-9._-]*?[a-zA-Z0-9]?\\.[a-zA-Z]{2,63}$";
 
 #### tạo bảng Category
 create table Category(
@@ -37,7 +35,7 @@ categoryId int not null );
 create table Customer(
 id int auto_increment primary key,
 name varchar(150) not null,
-email varchar(150) not null unique,
+email varchar(150) not null unique check (email regexp '^[a-zA-Z0-9][a-zA-Z0-9.!#$%&*+-/=?^_`{|}~]*?[a-zA-Z0-9._-]?@[a-zA-Z0-9][a-zA-Z0-9._-]*?[a-zA-Z0-9]?\\.[a-zA-Z]{2,63}$' ),
 phone varchar(50) not null unique,
 address varchar(255),
 createdDate date default(curdate()),
