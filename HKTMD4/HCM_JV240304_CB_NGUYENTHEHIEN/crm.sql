@@ -83,39 +83,41 @@ VALUES
     ('2024-08-14', '2024-08-28', 1, 14),
     ('2024-08-15', '2024-08-29', 3, 15);
 
-
-#### Viết truy vấn SQL để lấy thông tin tất cả các giao dịch mượn sách, bao gồm tên sách,tên độc giả,ngày mượn và ngày trả
+#### Yêu cầu 1 (Sử dụng lệnh SQL để truy vấn cơ bản):
+#### 1. Viết truy vấn SQL để lấy thông tin tất cả các giao dịch mượn sách, bao gồm tên sách,tên độc giả,ngày mượn và ngày trả
 select b.book_title  "Tên Sách",rd.name  "Tên Độc Giả",br.borrow_date  "Ngày Mượn",br.return_date  "Ngày Trả" from BorrowingRecords br join Books b 
 on br.book_id = b.book_id
 join Readers rd 
 on br.reader_id = rd.id;
 
-####  Viết truy vấn SQL để tìm tất cả các sách mà độc giả bất kỳ đã mượn (ví dụ độc giả có tên Nguyễn Văn A)
+####  2.Viết truy vấn SQL để tìm tất cả các sách mà độc giả bất kỳ đã mượn (ví dụ độc giả có tên Nguyễn Văn A)
 select b.book_title  "Tên Sách",rd.name  "Tên Độc Giả",br.borrow_date  "Ngày Mượn",br.return_date  "Ngày Trả" from BorrowingRecords br join Books b 
 on br.book_id = b.book_id
 join Readers rd 
 on br.reader_id = rd.id
 where rd.name = 'Le Van c'; -- Nhập tên Độc giả muốn tìm vào
 
-#### Đếm số lần một cuốn sách đã được mượn
+#### 3.Đếm số lần một cuốn sách đã được mượn
 select b.book_title  "Tên Sách",COUNT(br.id)  "Số Lần Mượn" from BorrowingRecords br join Books b 
 on br.book_id = b.book_id
 group by b.book_title;
 
-#### Truy vấn tên của độc giả đã mượn nhiều sách nhất
+#### 4.Truy vấn tên của độc giả đã mượn nhiều sách nhất
 select r.name  "Tên Học Giả",COUNT(br.id)  "Tổng Số Lần Mượn" from BorrowingRecords br join Readers r
 on br.reader_id = r.id
 group by r.name
 order by COUNT(br.id) desc limit 1 ;
 
-#### Tạo một view tên là borrowed_books để hiển thị thông tin của tất cả các sách đã được mượn, bao gồm tên sách, tên độc giả, và ngày mượn. Sử dụng các bảng Books, Readers và BorrowingRecords.
+#### Yêu cầu 2 (Sử dụng lệnh SQL tạo View):
+#### 1.Tạo một view tên là borrowed_books để hiển thị thông tin của tất cả các sách đã được mượn, bao gồm tên sách, tên độc giả, và ngày mượn. Sử dụng các bảng Books, Readers và BorrowingRecords.
 create view borrowed_books as
 select Books.book_title  'Tên Sách',Readers.name  'Tên Độc Giả',BorrowingRecords.borrow_date  'Ngày Mượn' from BorrowingRecords join Books 
 on BorrowingRecords.book_id = Books.book_id
 join Readers 
 on BorrowingRecords.reader_id = Readers.id;
 
-####  Viết một thủ tục tên là get_books_borrowed_by_reader nhận một tham số là reader_id .Thủ tục này sẽ trả về danh sách các sách mà độc giả đó đã mượn,bao gồm tên sách và ngày mượn.
+#### Yêu cầ 3 (Sử dụng lệnh SQL tạo thủ tục Stored Procedure)
+####  1.Viết một thủ tục tên là get_books_borrowed_by_reader nhận một tham số là reader_id .Thủ tục này sẽ trả về danh sách các sách mà độc giả đó đã mượn,bao gồm tên sách và ngày mượn.
 delimiter //
 create procedure get_books_borrowed_by_reader(reader_id int)
 begin

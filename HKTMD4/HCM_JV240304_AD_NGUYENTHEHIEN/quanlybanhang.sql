@@ -8,8 +8,9 @@
 -- drop table Booking;
 #### xóa bảng BookingDetail
 -- drop table BookingDetail;
-
+#### định dạng Email
 select * FROM Customer WHERE Email NOT REGEXP "^[a-zA-Z0-9][a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*?[a-zA-Z0-9._-]?@[a-zA-Z0-9][a-zA-Z0-9._-]*?[a-zA-Z0-9]?\\.[a-zA-Z]{2,63}$";
+
 #### tạo bảng Category
 create table Category(
 id int auto_increment primary key,
@@ -131,13 +132,14 @@ VALUES
 (5, 9, 1000000, '2024-12-01', '2024-12-05'),
 (5, 10, 950000, '2024-12-01', '2024-12-05');
 
-#### Lấy ra danh phòng có sắp xếp giảm dần theo Price gồm các cột sau:Id,Name,Price,SalePrice,Status,CategoryName,CreatedDate
+####  Yêu cầu 1 (Sử dụng lệnh SQL để truy vấn cơ bản):
+#### 1.Lấy ra danh phòng có sắp xếp giảm dần theo Price gồm các cột sau:Id,Name,Price,SalePrice,Status,CategoryName,CreatedDate
 select r.id Id,r.name 'Tên Phòng',r.price 'Giá Phòng',r.saleprice 'Giá Giảm',r.status 'Trạng Thái',c.name 'Loại Phòng',r.createdDate 'Ngày Tạo' from Room r join Category c 
 on r.categoryId = c.id
 order by r.price desc;
 
 
-#### Lấy ra danh sách Category gồm:Id,Name,TotalRoom,Status(Trong đó cột Status nếu = 0 là Ẩn , = 1 là Hiển thị)
+#### 2. Lấy ra danh sách Category gồm:Id,Name,TotalRoom,Status(Trong đó cột Status nếu = 0 là Ẩn , = 1 là Hiển thị)
 select c.id ID, c.name 'Tên', COUNT(r.id) 'Tổng Số Phòng',
     case
         when c.status = 1 then 'Hiển thị'
@@ -147,7 +149,7 @@ from Category c left join Room r
 on c.id = r.categoryId
 group by c.id, c.name, c.status;
 
-#### Truy vấn danh sách Customer gồm:Id,Name,Email,Phone,Address,CreatedDate,Gender,BirthDay,Age(Age là cột suy ra từ BirthDay,Gender nếu = 0 là Nam, 1 là Nữ, 2 là khác)
+#### 3.Truy vấn danh sách Customer gồm:Id,Name,Email,Phone,Address,CreatedDate,Gender,BirthDay,Age(Age là cột suy ra từ BirthDay,Gender nếu = 0 là Nam, 1 là Nữ, 2 là khác)
 select id ID ,name 'Tên',email 'Email',phone 'Số Điện Thoại',address 'Địa Chỉ',createdDate 'Giờ Tạo',
 	case
 	when gender = 0 then 'Nam'
@@ -158,7 +160,7 @@ select id ID ,name 'Tên',email 'Email',phone 'Số Điện Thoại',address 'Đ
     TIMESTAMPDIFF(year, birthday, CURDATE()) 'Tuổi'
 from Customer;
 
-#### Truy vấn danh sách Customergồm:Id,Name,Email,Phone,Address,CreatedDate,Gender,BirthDay, Age (Age là cột suy ra từ BirthDay, Gender nếu = 0 là Nam,1 là Nữ ,2 là khác)
+#### 4.Truy vấn danh sách Customergồm:Id,Name,Email,Phone,Address,CreatedDate,Gender,BirthDay, Age (Age là cột suy ra từ BirthDay, Gender nếu = 0 là Nam,1 là Nữ ,2 là khác)
 select id ID ,name 'Tên',email 'Email',phone 'Số Điện Thoại',address 'Địa Chỉ',createdDate 'Giờ Tạo',
 	case
 	when gender = 0 then 'Nam'
@@ -169,14 +171,15 @@ select id ID ,name 'Tên',email 'Email',phone 'Số Điện Thoại',address 'Đ
     TIMESTAMPDIFF(year, birthday, CURDATE()) 'Tuổi'
 from Customer;
 
-#### View v_getRoomInfo Lấy ra danh sách của 10 phòng có giá cao nhất
+####  Yêu cầu 2 (Sử dụng lệnh SQL tạo View):
+#### 1.View v_getRoomInfo Lấy ra danh sách của 10 phòng có giá cao nhất
 create view v_getRoomInfo as
 select id, name, price, saleprice, status, categoryId, createdDate from Room
 order by price desc limit 10;
 
 select * from v_getRoomInfo; -- truy vấn
 
-#### View v_getBookingList hiển thị danh sách phiếu đặt hàng gồm :Id,BookingDate,Status,CusName,Email, Phone,TotalAmount ( Trong đó cột Status nếu = 0 Chưa duyệt,= 1 Đã duyệt,= 2 Đã thanh toán,= 3 Đã hủy)
+#### 2.View v_getBookingList hiển thị danh sách phiếu đặt hàng gồm :Id,BookingDate,Status,CusName,Email, Phone,TotalAmount ( Trong đó cột Status nếu = 0 Chưa duyệt,= 1 Đã duyệt,= 2 Đã thanh toán,= 3 Đã hủy)
 create view v_getBookingList as
 select b.id 'ID',b.bookingDate 'Ngày Đặt',
     case 
@@ -192,8 +195,8 @@ on b.id = bd.bookingId
 group by b.id, b.bookingDate, b.status, c.name, c.email, c.phone;
 
 SELECT * FROM v_getBookingList; -- truy vấn
-
-#### Thủ tục addRoomInfo thực hiện thêm mới Room,khi gọi thủ tục truyền đầy đủ các giá trị của bảng Room (Trừ cột tự động tăng)
+#### Yêu cầu 3 (Sử dụng lệnh SQL tạo thủ tục Stored Procedure)
+#### 1.Thủ tục addRoomInfo thực hiện thêm mới Room,khi gọi thủ tục truyền đầy đủ các giá trị của bảng Room (Trừ cột tự động tăng)
 -- xóa procedure
 drop procedure addRoomInfo;
 delimiter //
@@ -205,7 +208,7 @@ end;//
 
 call addRoomInfo('Dark Room 666', 1, 6000000, 1800000, '2024-09-05', 1); -- thêm vào
 
-####  Thủ tục getBookingByCustomerId hiển thị danh sách phieus đặt phòng của khách hàng theo Id khách hàng gồm :Id, BookingDate,Status, TotalAmount(Trong đó cột Status nếu = 0 Chưa duyệt, = 1 Đã duyệt,= 2 Đã thanh toán , = 3 Đã hủy),Khi gọi thủ tục truyền vào id của khách hàng
+####  2.Thủ tục getBookingByCustomerId hiển thị danh sách phieus đặt phòng của khách hàng theo Id khách hàng gồm :Id, BookingDate,Status, TotalAmount(Trong đó cột Status nếu = 0 Chưa duyệt, = 1 Đã duyệt,= 2 Đã thanh toán , = 3 Đã hủy),Khi gọi thủ tục truyền vào id của khách hàng
 delimiter //
 create procedure getBookingByCustomerId(customerId int)
 begin
@@ -223,7 +226,7 @@ end;//
 -- truy vấn
 call getBookingByCustomerId(5); -- truyền vào sô ID bạn muốn tìm
 
-#### Thủ tục getRoomPaginate lấy ra danh sách phòng có phân trang gồm :Id,Name,Price,SalePrice, Khi gọi thủ tuc truyền vào limit và page
+#### 3.Thủ tục getRoomPaginate lấy ra danh sách phòng có phân trang gồm :Id,Name,Price,SalePrice, Khi gọi thủ tuc truyền vào limit và page
 -- xóa procedure
 drop procedure getRoomPaginate;
 
@@ -238,7 +241,7 @@ end;//
 -- truy vấn
 call getRoomPaginate(5,2); -- truyền vào số lượng hiển thị trên trang và số lượng trang
 
-
+#### Yêu cầu 4 (Sử dụng lệnh SQL tạo Trigger)
 #### Tạo trigger tr_Check_Price_Value sao cho khi thêm hoặc sửa phòng Room nếu nếu giá trị của cột Price > 5.000.000 thì tự động chuyển về 5.000.000 và in ra thông báo‘Giá phòng lớn nhất 5triệu’
 delimiter //
 create trigger tr_Check_Price_Value
